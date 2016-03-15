@@ -165,13 +165,13 @@ private:
 			Matrix& w, const EActType up_act_type); 
 
 	// NAME
-	//	UpdateWeightMats - update all transform matrices in MLP
+	//	UpdateTransformMatrices - update all transform matrices in MLP
 	// 
 	// DESCRIPTION
 	//	After transform matrices updating, elements of all change matrices should be set as 0
 	//	
 	//	learning_rate: learning rate
-	void UpdateWeightMats(const double learning_rate); 
+	void UpdateTransformMatrices(const double learning_rate); 
 
 	// NAME
 	//	Validation - validate current MLP model

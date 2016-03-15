@@ -61,7 +61,7 @@ public:
 	//	DActRegula - get derivation of the regularization term
 	// 
 	// DESCRIPTION
-	//	v: element value of weight matrix
+	//	v: element value of transform matrix
 	//	eRegula: regularization type
 	//	lambda: tiny constant
 	//
@@ -70,10 +70,10 @@ public:
 	static double DActRegula(const double v, const ERegula eRegula, const double lambda = 0.000001); 
 
 	// NAME
-	//	InitTransformMatrix - initialize the weight matrix based on the type of activation
+	//	InitTransformMatrix - initialize the transform matrix based on the type of activation
 	//
 	// DESCRIPTION
-	//	w: weight matrix
+	//	w: transform matrix
 	//	eActType: type of activation
 	static void InitTransformMatrix(Matrix& w, const EActType eActType);
 };

@@ -138,12 +138,12 @@ void Perceptron::Train(vector<Pattern*>& vtrPatts)
 			if(m_paramsLearning.mini_batch > 0)	// online or mini-batch
 			{
 				if((p+1) % m_paramsLearning.mini_batch == 0)
-					UpdateWeightMats(learning_rate);
+					UpdateTransformMatrix(learning_rate);
 			}
 		}	
 
 		if(m_paramsLearning.mini_batch == 0)	// batch 
-			UpdateWeightMats(learning_rate);
+			UpdateTransformMatrix(learning_rate);
 		
 		validation = Validation(vtrPatts, cross_cnt); 
 		rmse = sqrt(error / (double)(train_cnt));
@@ -449,7 +449,7 @@ double Perceptron::BackPropagate(const double* out_vals, const int32_t out_len)
 }
 
 
-void Perceptron::UpdateWeightMats(const double learning_rate)
+void Perceptron::UpdateTransformMatrix(const double learning_rate)
 {
 	// update transform matrix
 	for(int32_t i = 0; i < m_paramsPerceptron.input; i++) 

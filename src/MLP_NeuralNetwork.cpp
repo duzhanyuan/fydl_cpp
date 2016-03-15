@@ -158,12 +158,12 @@ void MLP_NeuralNetwork::Train(vector<Pattern*>& vtrPatts)
 			if(m_paramsLearning.mini_batch > 0)	// online or mini-batch
 			{
 				if((p+1) % m_paramsLearning.mini_batch == 0)
-					UpdateWeightMats(learning_rate);
+					UpdateTransformMatrices(learning_rate);
 			}
 		}	
 
 		if(m_paramsLearning.mini_batch == 0)	// batch 
-			UpdateWeightMats(learning_rate);
+			UpdateTransformMatrices(learning_rate);
 
 		validation = Validation(vtrPatts, cross_cnt); 
 		rmse = sqrt(error / (double)(train_cnt));
@@ -664,7 +664,7 @@ void MLP_NeuralNetwork::ActivateForward(double* up_a, const int32_t up_size, con
 }
 
 
-void MLP_NeuralNetwork::UpdateWeightMats(const double learning_rate)
+void MLP_NeuralNetwork::UpdateTransformMatrices(const double learning_rate)
 {
 	int32_t hl = (int32_t)m_paramsNN.vtr_hidden.size();	// number of hidden layers
 

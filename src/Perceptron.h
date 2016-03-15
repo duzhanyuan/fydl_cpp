@@ -146,13 +146,13 @@ private:
 	double BackPropagate(const double* out_vals, const int32_t out_len); 
 
 	// NAME
-	//	UpdateWeightMats - update all transform matrices in MLP
+	//	UpdateTransformMatrix - update transform matrix in perceptron
 	// 
 	// DESCRIPTION
 	//	After transform matrices updating, elements of all change matrices should be set as 0
 	//	
 	//	learning_rate: learning rate
-	void UpdateWeightMats(const double learning_rate);
+	void UpdateTransformMatrix(const double learning_rate);
 	
 	// NAME
 	//	Validation - validate current perceptron model
