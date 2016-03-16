@@ -15,6 +15,7 @@ FYDL_LIB_OUT = $(FYDL_LIB_OUT_PATH)/libfydl.a
 
 
 FYDL_OBJS = $(SRC_PATH)/TypeDefs.o
+FYDL_OBJS += $(SRC_PATH)/Utility.o
 FYDL_OBJS += $(SRC_PATH)/Activation.o
 FYDL_OBJS += $(SRC_PATH)/StringArray.o
 FYDL_OBJS += $(SRC_PATH)/Pattern.o

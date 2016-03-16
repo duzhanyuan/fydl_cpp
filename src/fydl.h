@@ -3,9 +3,10 @@
 
 #include "StringArray.h"
 #include "Timer.h"
+#include "TypeDefs.h"
+#include "Utility.h"
 #include "Pattern.h"
 #include "Activation.h"
-#include "TypeDefs.h"
 #include "MLP_NeuralNetwork.h"
 #include "Perceptron.h"
 

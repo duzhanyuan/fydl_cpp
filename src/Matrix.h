@@ -55,12 +55,6 @@ public:
 	// Sparsificate the matrix
 	void Sparsification(const double dSpTh = 0.000000000001); 
 
-	// NAME
-	//	RandUni - generate random value based on uniform distribution
-	//	RandNormal - generate random value based on normal distribution
-	static double RandUni(const double left = 0.0, const double right = 1.0);
-	static double RandNormal(const double mu = 0.0, const double sigma = 1.0);
-
 private: 
 	int32_t m_nRows;	// number of rows 
 	int32_t m_nCols;	// number of columes

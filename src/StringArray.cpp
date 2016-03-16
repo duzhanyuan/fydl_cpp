@@ -41,22 +41,22 @@ void StringArray::Decompose(const char* sStr, const char* sDilm)
 { 
 	string str(sStr);
        	str += string(sDilm) + string("EOF");	
-	int32_t nLen = str.length(); 	
-	int32_t nOffset = 0, nPos; 
-	while(nOffset < nLen)
+	int32_t len = str.length(); 	
+	int32_t offset = 0, pos; 
+	while(offset < len)
 	{ 
-		nPos = str.find(sDilm, nOffset); 
-		if(nPos == string::npos)  
-			nPos = str.length();
-		if(nPos == nOffset)
+		pos = str.find(sDilm, offset); 
+		if(pos == (int32_t)string::npos)  
+			pos = str.length();
+		if(pos == offset)
 		{
 			m_vtrString.push_back(string("")); 
 		}
 		else
 		{		       
-			m_vtrString.push_back(str.substr(nOffset, nPos - nOffset)); 
+			m_vtrString.push_back(str.substr(offset, pos - offset)); 
 		}
-		nOffset = nPos + strlen(sDilm); 
+		offset = pos + strlen(sDilm); 
 	}
 	m_vtrString.pop_back(); 
 }  

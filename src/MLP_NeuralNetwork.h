@@ -68,7 +68,7 @@ public:
 	// DESCRIPTION
 	//	nInput: number of input signal 
 	//	vtrHidden: number of hidden nodes for each hidden layer, in bottom-up order
-	//	nInput: number of output signal 
+	//	nOnput: number of output signal 
 	//	eActHidden, eActOutput: activation types of hidden and output layers
 	//	pLearningParamsT: learning parameters
 	//	sConfigFile: config file

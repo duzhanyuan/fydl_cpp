@@ -1,8 +1,6 @@
 #include "Matrix.h"
+#include "Utility.h"
 using namespace fydl; 
-#include <sys/time.h>
-#include <stdlib.h>
-#include <math.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +67,7 @@ void Matrix::Init_RandUni(const double left, const double right)
 	for(int32_t i = 0; i < m_nRows; i++) 
 	{
 		for(int32_t j = 0; j < m_nCols; j++) 
-			m_data[i][j] = RandUni(left, right); 
+			m_data[i][j] = Utility::RandUni(left, right); 
 	}
 }
 
@@ -79,7 +77,7 @@ void Matrix::Init_RandNormal(const double mu, const double sigma)
 	for(int32_t i = 0; i < m_nRows; i++) 
 	{
 		for(int32_t j = 0; j < m_nCols; j++) 
-			m_data[i][j] = RandNormal(mu, sigma); 
+			m_data[i][j] = Utility::RandNormal(mu, sigma); 
 	}
 }
 
@@ -123,27 +121,5 @@ void Matrix::Sparsification(const double dSpTh)
 }
 
 
-double Matrix::RandUni(const double left, const double right)
-{
-	timeval now;
-	gettimeofday(&now, NULL);	
-	srand(now.tv_sec + now.tv_usec);
-	return (double)rand() / RAND_MAX * (right - left) + left;
-}
-
-
-double Matrix::RandNormal(const double mu, const double sigma)
-{
-	timeval now;
-	gettimeofday(&now, NULL);	
-	srand(now.tv_sec + now.tv_usec);
-
-	double norm = 1.0 / (RAND_MAX + 1.0);	
-	double u = 1.0 - rand() * norm; 
-	double v = rand() * norm;	
-	double z = sqrt(-2.0 * log(u)) * cos(2.0 * M_PI * v);
-
-	return sigma * z + mu; 
-}
 
 
