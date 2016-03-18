@@ -21,8 +21,8 @@ using namespace fydl;
 
 void PrintHelp()
 {
-	cout<<"Usage: mlp_example [--train <config_file> <training_patterns_file> <out_model_file>"<<endl;   
-	cout<<"                   [--test <model_file> <testing_patterns_file>]"<<endl;   
+	cout<<"Usage: perceptron_example [--train <config_file> <training_patterns_file> <out_model_file>"<<endl;   
+	cout<<"                          [--test <model_file> <testing_patterns_file>]"<<endl;   
 }
 
 
@@ -71,9 +71,9 @@ void TrainDemo(const char* sConfigFile, const char* sPattFile, const char* sMode
 		return; 
 	}
 
-	TypeDefs::PrintLearningParams(cout, perceptron.GetLearningParams()); 
+	TypeDefs::Print_LearningParamsT(cout, perceptron.GetLearningParams()); 
 	cout<<"--"<<endl; 
-	TypeDefs::PrintPerceptronParamsT(cout, perceptron.GetPerceptronParams()); 
+	TypeDefs::Print_PerceptronParamsT(cout, perceptron.GetPerceptronParams()); 
 	cout<<"==========================="<<endl; 
 
 	perceptron.Train(vtr_patts); 
@@ -98,9 +98,9 @@ void TestDemo(const char* sModelFile, const char* sPattFile)
 		return;
 	}
 
-	TypeDefs::PrintLearningParams(cout, perceptron.GetLearningParams()); 
+	TypeDefs::Print_LearningParamsT(cout, perceptron.GetLearningParams()); 
 	cout<<"--"<<endl; 
-	TypeDefs::PrintPerceptronParamsT(cout, perceptron.GetPerceptronParams()); 
+	TypeDefs::Print_PerceptronParamsT(cout, perceptron.GetPerceptronParams()); 
 	cout<<"=========================="<<endl; 
 
 	vector<Pattern*> vtr_patts; 

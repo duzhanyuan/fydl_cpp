@@ -21,8 +21,8 @@ FYDL_OBJS += $(SRC_PATH)/StringArray.o
 FYDL_OBJS += $(SRC_PATH)/Pattern.o
 FYDL_OBJS += $(SRC_PATH)/Timer.o
 FYDL_OBJS += $(SRC_PATH)/Matrix.o
-FYDL_OBJS += $(SRC_PATH)/MLP_NeuralNetwork.o
 FYDL_OBJS += $(SRC_PATH)/Perceptron.o
+FYDL_OBJS += $(SRC_PATH)/MLP.o
 
 TEST_SRC_PATH = ./example/
 TESTS = mlp_example

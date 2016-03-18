@@ -1,4 +1,4 @@
-// MLP_NeuralNetwork.h
+// MLP.h
 //
 // MultiLayer Perceptron (MLP) neural network consists one input layer, one output layer and some hidden layers. 
 //
@@ -21,8 +21,8 @@
 //	v1.0 2016-03-14
 //
 
-#ifndef _FYDL_MLP_NEURAL_NETWORK_H 
-#define _FYDL_MLP_NEURAL_NETWORK_H 
+#ifndef _FYDL_MLP_H 
+#define _FYDL_MLP_H 
 
 #include <string>
 #include <vector>
@@ -49,17 +49,17 @@ namespace fydl
 {
 
 // CLASS
-//	MLP_NeuralNetwork - neural network based on MLP
+//	MLP - neural network based on MLP
 //
 // DESCRIPTION
 //	This MLP neural network is based on back-propagation algorithm. 
 //	The training supports online(SGD), mini-batch(MSGD) and batch(GD) mode
 //
-class MLP_NeuralNetwork
+class MLP
 {
 public: 
-	MLP_NeuralNetwork();
-	virtual ~MLP_NeuralNetwork();
+	MLP();
+	virtual ~MLP();
 
 	// NAME
 	//	Init - initialize the MLP parameters, including learning parameters and MLP architecture parameters 
@@ -204,6 +204,6 @@ private:
 
 }
 
-#endif /* _FYDL_MLP_NEURAL_NETWORK_H */
+#endif /* _FYDL_MLP_H */
 
 

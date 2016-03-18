@@ -79,7 +79,7 @@ EActType TypeDefs::ActType(const char* sActTypeName)
 }
 
 
-void TypeDefs::PrintLearningParams(ostream& os, const LearningParamsT paramsLearning)
+void TypeDefs::Print_LearningParamsT(ostream& os, const LearningParamsT paramsLearning)
 {
 	os<<"Regula:       "<<RegulaName(paramsLearning.regula)<<endl;	
 	os<<"MiniBatch:    "<<paramsLearning.mini_batch<<endl; 
@@ -90,7 +90,7 @@ void TypeDefs::PrintLearningParams(ostream& os, const LearningParamsT paramsLear
 }
 
 
-void TypeDefs::PrintMLPNNParamsT(ostream& os, const MLPNNParamsT paramsMLPNN)
+void TypeDefs::Print_MLPNNParamsT(ostream& os, const MLPNNParamsT paramsMLPNN)
 {
 	os<<"Input:     "<<paramsMLPNN.input<<endl; 
 	os<<"Output:    "<<paramsMLPNN.output<<endl; 
@@ -108,7 +108,7 @@ void TypeDefs::PrintMLPNNParamsT(ostream& os, const MLPNNParamsT paramsMLPNN)
 }
 
 
-void TypeDefs::PrintPerceptronParamsT(ostream& os, const PerceptronParamsT paramsPerceptron)
+void TypeDefs::Print_PerceptronParamsT(ostream& os, const PerceptronParamsT paramsPerceptron)
 {
 	os<<"Input:     "<<paramsPerceptron.input<<endl; 
 	os<<"Output:    "<<paramsPerceptron.output<<endl; 

@@ -1,6 +1,6 @@
 // mlp_example.cpp
 //
-// example of MLP_NeuralNetwork 
+// example of MLP 
 //
 // AUTHOR
 //	fengyoung (fengyoung82@sina.com)
@@ -65,16 +65,16 @@ void TrainDemo(const char* sConfigFile, const char* sPattFile, const char* sMode
 		return; 
 	}
 
-	MLP_NeuralNetwork mlp_nn;
+	MLP mlp_nn;
 	if(!mlp_nn.InitFromConfig(sConfigFile, vtr_patts[0]->m_nXCnt, vtr_patts[0]->m_nYCnt))
 	{
 		cout<<"failed to initialize the MLP_NN from config file "<<sConfigFile<<endl; 
 		return; 
 	}
 
-	TypeDefs::PrintLearningParams(cout, mlp_nn.GetLearningParams()); 
+	TypeDefs::Print_LearningParamsT(cout, mlp_nn.GetLearningParams()); 
 	cout<<"--"<<endl; 
-	TypeDefs::PrintMLPNNParamsT(cout, mlp_nn.GetMLPNNParams()); 
+	TypeDefs::Print_MLPNNParamsT(cout, mlp_nn.GetMLPNNParams()); 
 	cout<<"==========================="<<endl; 
 
 	mlp_nn.Train(vtr_patts); 
@@ -92,16 +92,16 @@ void TestDemo(const char* sModelFile, const char* sPattFile)
 {
 	cout<<"== MLP Example: Testing =="<<endl; 
 	
-	MLP_NeuralNetwork mlp_nn;
+	MLP mlp_nn;
 	if(mlp_nn.Load(sModelFile) != _MLP_SUCCESS)
 	{
 		cout<<"failed to load the MLP model from "<<sModelFile<<endl; 
 		return;
 	}
 
-	TypeDefs::PrintLearningParams(cout, mlp_nn.GetLearningParams()); 
+	TypeDefs::Print_LearningParamsT(cout, mlp_nn.GetLearningParams()); 
 	cout<<"--"<<endl; 
-	TypeDefs::PrintMLPNNParamsT(cout, mlp_nn.GetMLPNNParams()); 
+	TypeDefs::Print_MLPNNParamsT(cout, mlp_nn.GetMLPNNParams()); 
 	cout<<"=========================="<<endl; 
 
 	vector<Pattern*> vtr_patts; 

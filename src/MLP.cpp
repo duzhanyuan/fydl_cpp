@@ -1,4 +1,4 @@
-#include "MLP_NeuralNetwork.h"
+#include "MLP.h"
 #include "Timer.h"
 #include "StringArray.h"
 using namespace fydl; 
@@ -13,7 +13,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Construction & Destruction  
 
-MLP_NeuralNetwork::MLP_NeuralNetwork()
+MLP::MLP()
 {
 	m_paramsLearning.regula = _REGULA_L1;
 	m_paramsLearning.mini_batch = 0; 
@@ -38,7 +38,7 @@ MLP_NeuralNetwork::MLP_NeuralNetwork()
 }
 
 
-MLP_NeuralNetwork::~MLP_NeuralNetwork()
+MLP::~MLP()
 {
 	Release(); 
 }
@@ -47,7 +47,7 @@ MLP_NeuralNetwork::~MLP_NeuralNetwork()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Operations 
 
-void MLP_NeuralNetwork::Init(const int32_t nInput, vector<int32_t>& vtrHidden, const int32_t nOutput, 
+void MLP::Init(const int32_t nInput, vector<int32_t>& vtrHidden, const int32_t nOutput, 
 		const EActType eActHidden, const EActType eActOutput, const LearningParamsT* pLearningParamsT)
 {
 	Release(); 
@@ -64,7 +64,7 @@ void MLP_NeuralNetwork::Init(const int32_t nInput, vector<int32_t>& vtrHidden, c
 }
 
 
-bool MLP_NeuralNetwork::InitFromConfig(const char* sConfigFile, const int32_t nInput, const int32_t nOutput)
+bool MLP::InitFromConfig(const char* sConfigFile, const int32_t nInput, const int32_t nOutput)
 {
 	if(!sConfigFile)
 		return false; 
@@ -124,7 +124,7 @@ bool MLP_NeuralNetwork::InitFromConfig(const char* sConfigFile, const int32_t nI
 }
 
 
-void MLP_NeuralNetwork::Train(vector<Pattern*>& vtrPatts)
+void MLP::Train(vector<Pattern*>& vtrPatts)
 {
 	int32_t patt_cnt = (int32_t)vtrPatts.size(); 	// number of patterns
 	int32_t cross_cnt = patt_cnt / 20;			// 5% patterns for corss validation
@@ -180,7 +180,7 @@ void MLP_NeuralNetwork::Train(vector<Pattern*>& vtrPatts)
 }
 
 
-int32_t MLP_NeuralNetwork::Predict(double* y, const int32_t y_len, const double* x, const int32_t x_len)
+int32_t MLP::Predict(double* y, const int32_t y_len, const double* x, const int32_t x_len)
 {
 	if(!y || !x)
 		return _MLP_ERROR_INPUT_NULL;
@@ -220,7 +220,7 @@ int32_t MLP_NeuralNetwork::Predict(double* y, const int32_t y_len, const double*
 }
 
 
-int32_t MLP_NeuralNetwork::Save(const char* sFile, const char* sTitle)
+int32_t MLP::Save(const char* sFile, const char* sTitle)
 {
 	if(!m_whs || m_wo.IsNull())
 		return _MLP_ERROR_MODEL_NULL; 
@@ -293,7 +293,7 @@ int32_t MLP_NeuralNetwork::Save(const char* sFile, const char* sTitle)
 }
 
 
-int32_t MLP_NeuralNetwork::Load(const char* sFile, const char* sCheckTitle)
+int32_t MLP::Load(const char* sFile, const char* sCheckTitle)
 {
 	ifstream ifs(sFile);  
 	if(!ifs.is_open())
@@ -445,13 +445,13 @@ int32_t MLP_NeuralNetwork::Load(const char* sFile, const char* sCheckTitle)
 }
 
 
-LearningParamsT MLP_NeuralNetwork::GetLearningParams()
+LearningParamsT MLP::GetLearningParams()
 {
 	return m_paramsLearning; 
 }
 
 
-MLPNNParamsT MLP_NeuralNetwork::GetMLPNNParams()
+MLPNNParamsT MLP::GetMLPNNParams()
 {
 	return m_paramsNN; 
 }
@@ -461,7 +461,7 @@ MLPNNParamsT MLP_NeuralNetwork::GetMLPNNParams()
 // Internal Operations 
 
 
-void MLP_NeuralNetwork::Create()
+void MLP::Create()
 {
 	int32_t hl = (int32_t)m_paramsNN.vtr_hidden.size();	// number of hidden layers
 
@@ -507,7 +507,7 @@ void MLP_NeuralNetwork::Create()
 }
 
 
-void MLP_NeuralNetwork::Release()
+void MLP::Release()
 {
 	int32_t hl = (int32_t)m_paramsNN.vtr_hidden.size();	// number of hidden layers
 
@@ -557,10 +557,10 @@ void MLP_NeuralNetwork::Release()
 }
 
 
-void MLP_NeuralNetwork::FeedForward(const double* in_vals, const int32_t in_len)
+void MLP::FeedForward(const double* in_vals, const int32_t in_len)
 {
 	if(!in_vals || in_len != m_paramsNN.input - 1)
-		throw "MLP_NeuralNetwork::FeedForward() ERROR: Wrong length of \'in_vals\'!"; 
+		throw "MLP::FeedForward() ERROR: Wrong length of \'in_vals\'!"; 
 
 	// activate input layer
 	for(int32_t i = 0; i < in_len; i++) 
@@ -582,10 +582,10 @@ void MLP_NeuralNetwork::FeedForward(const double* in_vals, const int32_t in_len)
 }
 
 
-double MLP_NeuralNetwork::BackPropagate(const double* out_vals, const int32_t out_len)
+double MLP::BackPropagate(const double* out_vals, const int32_t out_len)
 {
 	if(!out_vals || out_len != m_paramsNN.output)
-		throw "MLP_NeuralNetwork::BackPropagate() ERROR: Wrong length of \'out_vals\'!"; 
+		throw "MLP::BackPropagate() ERROR: Wrong length of \'out_vals\'!"; 
 
 	double error = 0.0; 
 	int32_t hl = (int32_t)m_paramsNN.vtr_hidden.size();	// number of hidden layers
@@ -638,7 +638,7 @@ double MLP_NeuralNetwork::BackPropagate(const double* out_vals, const int32_t ou
 }
 
 
-void MLP_NeuralNetwork::ActivateForward(double* up_a, const int32_t up_size, const double* low_a, const int32_t low_size, 
+void MLP::ActivateForward(double* up_a, const int32_t up_size, const double* low_a, const int32_t low_size, 
 		Matrix& w, const EActType up_act_type)
 {
 	double sum;
@@ -664,7 +664,7 @@ void MLP_NeuralNetwork::ActivateForward(double* up_a, const int32_t up_size, con
 }
 
 
-void MLP_NeuralNetwork::UpdateTransformMatrices(const double learning_rate)
+void MLP::UpdateTransformMatrices(const double learning_rate)
 {
 	int32_t hl = (int32_t)m_paramsNN.vtr_hidden.size();	// number of hidden layers
 
@@ -701,7 +701,7 @@ void MLP_NeuralNetwork::UpdateTransformMatrices(const double learning_rate)
 }
 
 
-pair<double, double> MLP_NeuralNetwork::Validation(vector<Pattern*>& vtrPatts, const int32_t nBackCnt)
+pair<double, double> MLP::Validation(vector<Pattern*>& vtrPatts, const int32_t nBackCnt)
 {
 	double error = 0.0; 
 	int32_t correct = 0, total = 0; 

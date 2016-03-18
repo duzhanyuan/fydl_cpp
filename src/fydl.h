@@ -7,8 +7,8 @@
 #include "Utility.h"
 #include "Pattern.h"
 #include "Activation.h"
-#include "MLP_NeuralNetwork.h"
 #include "Perceptron.h"
+#include "MLP.h"
 
 #endif /* _FYDL_FYDL_H */
 

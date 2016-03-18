@@ -83,11 +83,13 @@ public:
 	static EActType ActType(const char* sActTypeName); 	
 
 	// Print learning parameters
-	static void PrintLearningParams(ostream& os, const LearningParamsT paramsLearning); 
+	static void Print_LearningParamsT(ostream& os, const LearningParamsT paramsLearning); 
+
 	// Print parameters of MLP
-	static void PrintMLPNNParamsT(ostream& os, const MLPNNParamsT paramsMLPNN);
+	static void Print_MLPNNParamsT(ostream& os, const MLPNNParamsT paramsMLPNN);
+	
 	// Print parameters of perceptron
-	static void PrintPerceptronParamsT(ostream& os, const PerceptronParamsT paramsPerceptron); 
+	static void Print_PerceptronParamsT(ostream& os, const PerceptronParamsT paramsPerceptron); 
 }; 
 
 
