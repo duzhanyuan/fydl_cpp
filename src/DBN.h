@@ -2,8 +2,8 @@
 //
 // Deep Belief Network (DBN) is made up by some RBMs and one MLP
 //
-// RBMs in DBN is used for feature detecting, the training of them is unsuppervised, it is thought as the pre-train of MLP
-// MLP in DBN is used for classification or regression, the training of MLP is suppervised, it is thought as fine-tuning of DBN
+// RBMs in DBN is used for feature detecting, the training of them is unsupervised, it is thought as the pre-train of MLP
+// MLP in DBN is used for classification or regression, the training of MLP is supervised, it is thought as fine-tuning of DBN
 //
 // AUTHOR
 //	fengyoung (fengyoung82@sina.com)
