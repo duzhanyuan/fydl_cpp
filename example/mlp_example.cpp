@@ -117,7 +117,7 @@ void TestDemo(const char* sModelFile, const char* sPattFile)
 	double* y = new double[y_len]; 
 	int32_t patts = (int32_t)vtr_patts.size(); 
 	int32_t correct = 0, success = 0; 
-	double error;	// 误差
+	double error;
 	double rmse = 0;
 
 	for(int32_t i = 0; i < patts; i++) 
