@@ -15,8 +15,8 @@ public:
 	StringArray(const char* sStr, const char* sDilm);   
 	virtual ~StringArray(); 
 	
-	string GetString(const uint32_t unIdx) const; 
-	uint32_t Count() const; 
+	string GetString(const int32_t nIdx) const; 
+	int32_t Count() const; 
 
 private: 
 	void Decompose(const char* sStr, const char* sDilm); 

@@ -190,4 +190,30 @@ double Pattern::Error(const double* y1, const double* y2, const int32_t len)
 }
 
 
+void Pattern::Print_Array(ostream& os, const double* x, const int32_t len)
+{
+	for(int32_t i = 0; i < len; i++) 
+	{
+		if(i == 0)
+			os<<x[i]; 
+		else
+			os<<","<<x[i]; 
+	}
+	os<<endl; 
+}
+
+
+bool Pattern::Read_Array(double* x, const int32_t len, istream& is)
+{
+	string str; 
+	std::getline(is, str); 
+	StringArray ar(str.c_str(), ","); 
+	if(ar.Count() != len)
+		return false; 
+	for(int32_t i = 0; i < len; i++) 
+		sscanf(ar.GetString(i).c_str(), "%lf", &(x[i])); 
+	return true; 
+}
+
+
 

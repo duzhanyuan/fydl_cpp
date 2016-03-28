@@ -1,6 +1,8 @@
 #include "Matrix.h"
 #include "Utility.h"
+#include "StringArray.h"
 using namespace fydl; 
+#include <stdio.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -121,5 +123,37 @@ void Matrix::Sparsification(const double dSpTh)
 }
 
 
+void Matrix::Print_Matrix(ostream& os, Matrix& mat)
+{
+	for(int32_t i = 0; i < mat.Rows(); i++) 
+	{
+		for(int32_t j = 0; j < mat.Cols(); j++) 
+		{
+			if(j == 0)
+				os<<mat[i][j];
+			else
+				os<<","<<mat[i][j];
+		}
+		os<<endl; 
+	}
+}
+
+
+bool Matrix::Read_Matrix(Matrix& mat, istream& is)
+{
+	int32_t row = 0;
+	string str; 
+	while(row < mat.Rows())
+	{
+		std::getline(is, str); 
+		StringArray ar(str.c_str(), ","); 
+		if(ar.Count() != mat.Cols())
+			return false;
+		for(int32_t j = 0; j < mat.Cols(); j++) 
+			sscanf(ar.GetString(j).c_str(), "%lf", &(mat[row][j]));  
+		row++; 	
+	}
+	return true; 
+}
 
 

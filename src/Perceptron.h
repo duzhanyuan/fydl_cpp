@@ -19,7 +19,6 @@
 //	v1.0 2016-03-14
 //
 
-
 #ifndef _FYDL_PERCEPTRON_H 
 #define _FYDL_PERCEPTRON_H 
 
@@ -31,15 +30,6 @@ using namespace std;
 #include "Pattern.h"
 #include "Matrix.h"
 
-// return value
-#define _PERCEPTRON_SUCCESS				0	// success
-#define _PERCEPTRON_ERROR_INPUT_NULL	-1	// the input parameters is null
-#define _PERCEPTRON_ERROR_WRONG_LEN		-2	// length error
-#define _PERCEPTRON_ERROR_MODEL_NULL	-3	// the model is null
-#define _PERCEPTRON_ERROR_FILE_OPEN		-4	// failed to open file
-#define _PERCEPTRON_ERROR_NOT_MODEL_FILE		-5	// is not perceptron model file
-#define _PERCEPTRON_ERROR_WEIGHT_MISALIGNMENT	-6	// weight is not aligned
-
 
 namespace fydl
 {
@@ -48,7 +38,7 @@ namespace fydl
 //	Perceptron - single perceptron 
 //
 // DESCRIPTION
-//	This perceptron is based on back-propagation algorithm. 
+//	This perceptron is based on Back-Propagation (BP) algorithm. 
 //	The training supports online(SGD), mini-batch(MSGD) and batch(GD) mode
 //
 class Perceptron
@@ -62,16 +52,15 @@ public:
 	//	InitFromConfig - initialize the perceptron parameters by values read from config file
 	// 
 	// DESCRIPTION
-	//	nInput: number of input signal 
-	//	nInput: number of output signal 
-	//	eActOutput: activation type of output layer
-	//	pLearningParamsT: learning parameters
+	//	perceptronParamsT: architecture parameters of perceptron
+	//	perceptronLearningParamsT: learning parameters
 	//	sConfigFile: config file
+	//	nInput: number of input signal 
+	//	nOnput: number of output signal 
 	//
 	// RETURN
 	//	true for success, false for some errors
-	void Init(const int32_t nInput, const int32_t nOutput, 
-			const EActType eActOutput = _ACT_SIGMOID, const LearningParamsT* pLearningParamsT = NULL); 
+	void Init(const PerceptronParamsT perceptronParamsT, const PerceptronLearningParamsT perceptronLearningParamsT); 
 	bool InitFromConfig(const char* sConfigFile, const int32_t nInput, const int32_t nOutput);
 
 	// NAME
@@ -96,35 +85,31 @@ public:
 
 	// NAME
 	//	Save - save current perceptron model to file
+	//	Load - load perceptron model from file to construct current object
 	//
 	// DESCRIPTION
 	//	sFile - perceptron model file
 	// 
 	// RETURN
-	//	true for success, false for some errors
+	//	Return _FYDL_SUCCESS for success, others for some errors
 	int32_t Save(const char* sFile, const char* sTitle = "Perceptron"); 
-	
-	// NAME
-	//	Load - load perceptron model from file to construct current object
-	//
-	// DESCRIPTION
-	//	sFile - preceptron model file
-	// 
-	// RETURN
-	//	true for success, false for some errors
-	int32_t Load(const char* sFile, const char* sCheckTitle = NULL); 
+	int32_t Load(const char* sFile, const char* sCheckTitle = "Perceptron"); 
 
 	// Get learning parameters
-	LearningParamsT GetLearningParams(); 
+	PerceptronLearningParamsT GetLearningParams(); 
 	
 	// Get architecture parameters 
-	PerceptronParamsT GetPerceptronParams(); 
+	PerceptronParamsT GetArchParams(); 
 
 private:
 	// Create inner objects, allocate menory
 	void Create();
 	// Release inner objects
 	void Release();
+	// Create assistant variables, allocate menory for them 
+	void CreateAssistant();
+	// Release assistant variables
+	void ReleaseAssistant(); 
 
 	// NAME
 	//	FeedForward - forward phase
@@ -146,13 +131,13 @@ private:
 	double BackPropagate(const double* out_vals, const int32_t out_len); 
 
 	// NAME
-	//	UpdateTransformMatrix - update transform matrix in perceptron
+	//	ModelUpdate - update transform matrix in perceptron
 	// 
 	// DESCRIPTION
 	//	After transform matrices updating, elements of all change matrices should be set as 0
 	//	
 	//	learning_rate: learning rate
-	void UpdateTransformMatrix(const double learning_rate);
+	void ModelUpdate(const double learning_rate); 
 	
 	// NAME
 	//	Validation - validate current perceptron model
@@ -166,17 +151,19 @@ private:
 	pair<double, double> Validation(vector<Pattern*>& vtrPatts, const int32_t nBackCnt);
 
 private: 
-	LearningParamsT m_paramsLearning;	// learning parameters
-	int32_t m_nIters;					// real iteration times
+	PerceptronLearningParamsT m_paramsLearning;	// learning parameters
 	PerceptronParamsT m_paramsPerceptron;	// architecture parameters of perceptron
 
+	// model variables
 	Matrix m_wo;		// transform matrix
 
+	// assistant variables for training
 	double* m_ai;	// input layer
 	double* m_ao;	// output layer
-	
 	double* m_do;	// delta array of output layer
 	Matrix m_co;	// change matrix of output layer
+
+	int32_t m_nPattCnt; 
 }; 
 
 }

@@ -20,17 +20,17 @@ StringArray::~StringArray()
 ////////////////////////////////////////////////////////////////////////////
 // Operations  
 
-string StringArray::GetString(const uint32_t unIdx) const 
+string StringArray::GetString(const int32_t nIdx) const 
 { 
-	if(unIdx >= (uint32_t)m_vtrString.size()) 
+	if(nIdx < 0 || nIdx >= (int32_t)m_vtrString.size()) 
 		return string(""); 
-	return m_vtrString[unIdx];  
+	return m_vtrString[nIdx];  
 }  
 
 
-uint32_t StringArray::Count() const 
+int32_t StringArray::Count() const 
 { 
-	return (uint32_t)m_vtrString.size();  
+	return (int32_t)m_vtrString.size();  
 }  
 
 

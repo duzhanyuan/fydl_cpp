@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 using namespace std; 
 #include <stdint.h>
 
@@ -91,6 +92,11 @@ public:
 	// RETURN
 	//	The difference value
 	static double Error(const double* y1, const double* y2, const int32_t len); 
+
+	// Print an array to stream
+	static void Print_Array(ostream& os, const double* x, const int32_t len); 
+	// Read an array from stream
+	static bool Read_Array(double* x, const int32_t len, istream& is); 
 
 public:
 	int32_t m_nXCnt;	// number of independent variables

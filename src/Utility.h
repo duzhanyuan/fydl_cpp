@@ -1,6 +1,8 @@
 #ifndef _FYDL_UTILITY_H 
 #define _FYDL_UTILITY_H 
 
+#include <vector>
+using namespace std; 
 #include <stdint.h>
 
 
@@ -15,6 +17,8 @@ private:
 
 	// generate random value
 	static int32_t Random(); 	
+	
+	static vector<int32_t> m_vtr; 
 
 public: 
 	// NAME
@@ -28,7 +32,7 @@ public:
 	static double RandUni(const double left = 0.0, const double right = 1.0);
 	
 	// NAME	
-	//	RandNormal - generate random value based on normal distribution
+	//	RandNormal - generate random value based on normal distribution based on Box-Muller algorithm
 	//
 	// DESCRIPTION
 	//	mu, sigma: mean and standard deviation the normal distribution
@@ -47,7 +51,6 @@ public:
 	// RETURN
 	//	random value
 	static int32_t RandBinomial(const int32_t n, const double p = 0.5);   
-
 };
 
 }

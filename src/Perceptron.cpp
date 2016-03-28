@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "StringArray.h"
 #include "Activation.h"
+#include "ConfigFile.h"
 using namespace fydl; 
 #include <algorithm>
 #include <fstream>
@@ -16,16 +17,6 @@ using namespace std;
 
 Perceptron::Perceptron()
 {
-	m_paramsLearning.regula = _REGULA_L1;
-	m_paramsLearning.mini_batch = 0; 
-	m_paramsLearning.iterations = 50;
-	m_paramsLearning.learning_rate = 0.5;
-	m_paramsLearning.rate_decay = 0.01;
-	m_paramsLearning.epsilon = 0.01;
-	m_nIters = 0; 
-
-	m_paramsPerceptron.act_output = _ACT_SIGMOID;
-
 	m_ai = NULL; 
 	m_ao = NULL; 
 
@@ -42,15 +33,13 @@ Perceptron::~Perceptron()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Operations 
 
-void Perceptron::Init(const int32_t nInput, const int32_t nOutput, const EActType eActOutput, const LearningParamsT* pLearningParamsT)
+void Perceptron::Init(const PerceptronParamsT perceptronParamsT, const PerceptronLearningParamsT perceptronLearningParamsT)
 {
 	Release(); 
 
-	m_paramsPerceptron.input = nInput + 1; // add 1 for bias nodes 
-	m_paramsPerceptron.output = nOutput; 
-	m_paramsPerceptron.act_output = eActOutput;
-	if(pLearningParamsT)
-		m_paramsLearning = *pLearningParamsT; 
+	m_paramsPerceptron = perceptronParamsT;
+	m_paramsPerceptron.input += 1;	// add 1 for bias nodes 
+	m_paramsLearning = perceptronLearningParamsT; 
 
 	Create(); 
 }
@@ -58,71 +47,48 @@ void Perceptron::Init(const int32_t nInput, const int32_t nOutput, const EActTyp
 
 bool Perceptron::InitFromConfig(const char* sConfigFile, const int32_t nInput, const int32_t nOutput)
 {
-	if(!sConfigFile)
+	ConfigFile conf_file; 
+	if(!conf_file.Read(sConfigFile)) 
 		return false; 
-	ifstream ifs(sConfigFile);
-	if(!ifs.is_open())
-		return false; 
-
 	Release(); 
 
-	m_paramsPerceptron.input = nInput + 1;		// add 1 for bias nodes
-	m_paramsPerceptron.output = nOutput;
+	m_paramsPerceptron.input = nInput + 1;	// add 1 for bias nodes
+	m_paramsPerceptron.output = nOutput; 
+	m_paramsPerceptron.act_output = TypeDefs::ActType(conf_file.GetVal_asString("Activation").c_str());   
+	if(m_paramsPerceptron.act_output == _ACT_NONE)
+		return false; 
 
-	string str; 
-	while(!ifs.eof())
-	{
-		std::getline(ifs, str); 
-		if(str.empty())
-			continue; 
-		if(str.at(0) == '#')
-			continue; 
+	m_paramsLearning.regula = TypeDefs::RegulaType(conf_file.GetVal_asString("Regula").c_str()); 
+	m_paramsLearning.mini_batch = conf_file.GetVal_asInt("MiniBatch"); 
+	m_paramsLearning.iterations = conf_file.GetVal_asInt("Iterations"); 
+	m_paramsLearning.learning_rate = conf_file.GetVal_asFloat("LearningRate"); 
+	m_paramsLearning.rate_decay = conf_file.GetVal_asFloat("RateDecay"); 
+	m_paramsLearning.epsilon = conf_file.GetVal_asFloat("Epsilon"); 
 
-		StringArray ar(str.c_str(), ":"); 
-		if(ar.Count() != 2)
-			continue; 
-
-		if(ar.GetString(0) == "Regula")
-			m_paramsLearning.regula = TypeDefs::RegulaType(ar.GetString(1).c_str()); 
-		else if(ar.GetString(0) == "MiniBatch")
-			sscanf(ar.GetString(1).c_str(), "%d", &m_paramsLearning.mini_batch);		
-		else if(ar.GetString(0) == "Iterations")
-			sscanf(ar.GetString(1).c_str(), "%d", &m_paramsLearning.iterations);		
-		else if(ar.GetString(0) == "LearningRate")
-			sscanf(ar.GetString(1).c_str(), "%lf", &m_paramsLearning.learning_rate);		
-		else if(ar.GetString(0) == "RateDecay")
-			sscanf(ar.GetString(1).c_str(), "%lf", &m_paramsLearning.rate_decay);		
-		else if(ar.GetString(0) == "Epsilon")
-			sscanf(ar.GetString(1).c_str(), "%lf", &m_paramsLearning.epsilon);		
-		else if(ar.GetString(0) == "OutputActivation")
-			m_paramsPerceptron.act_output = TypeDefs::ActType(ar.GetString(1).c_str()); 
-	}
 	Create(); 
 
-	ifs.close();
 	return true; 
 }
 
 
 void Perceptron::Train(vector<Pattern*>& vtrPatts)
 {
-	int32_t patt_cnt = (int32_t)vtrPatts.size(); 	// number of patterns
-	int32_t cross_cnt = patt_cnt / 20;			// 5% patterns for corss validation
-	int32_t train_cnt = patt_cnt - cross_cnt;	// 95% patterns for training
+	int32_t cross_cnt = (int32_t)vtrPatts.size() / 20;			// 5% patterns for corss validation
+	int32_t train_cnt = (int32_t)vtrPatts.size() - cross_cnt;	// 95% patterns for training
 	double learning_rate = m_paramsLearning.learning_rate;	// learning rate, it would be update after every iteration
 	double error, rmse;	// training error and RMSE in one iteration
 	pair<double,double> validation;	// precision and RMSE of validation 
 	Timer timer;		// timer
 
+	// create assistant variables for training
+	CreateAssistant();
+	
 	// shuffle pattens 
 	random_shuffle(vtrPatts.begin(), vtrPatts.end());
 
-	m_nIters = 0; 
-	while(m_nIters < m_paramsLearning.iterations)
+	for(int32_t t = 0; t < m_paramsLearning.iterations; t++)
 	{
-		m_nIters++; 
-		printf("iter %d ", m_nIters);
-		error = 0; 	
+		error = 0.0; 	
 
 		timer.Start(); 	
 
@@ -134,24 +100,25 @@ void Perceptron::Train(vector<Pattern*>& vtrPatts)
 			// forward & backward phase
 			FeedForward(vtrPatts[p]->m_x, vtrPatts[p]->m_nXCnt); 
 			error += BackPropagate(vtrPatts[p]->m_y, vtrPatts[p]->m_nYCnt); 
+			m_nPattCnt++; 	
 
 			if(m_paramsLearning.mini_batch > 0)	// online or mini-batch
 			{
-				if((p+1) % m_paramsLearning.mini_batch == 0)
-					UpdateTransformMatrix(learning_rate);
+				if(m_nPattCnt >= m_paramsLearning.mini_batch) 
+					ModelUpdate(learning_rate); 
 			}
 		}	
 
 		if(m_paramsLearning.mini_batch == 0)	// batch 
-			UpdateTransformMatrix(learning_rate);
-		
+			ModelUpdate(learning_rate); 
+
 		validation = Validation(vtrPatts, cross_cnt); 
 		rmse = sqrt(error / (double)(train_cnt));
 
 		timer.Stop(); 	
 
-		printf("| learning_rate: %.6g | error: %.6g | rmse: %.6g | validation(pr & rmse): %.4g%% & %.6g | time_cost(s): %.3f\n", 
-				learning_rate, error, rmse, validation.first * 100.0, validation.second, timer.GetLast_asSec()); 
+		printf("iter %d | learning_rate: %.6g | error: %.6g | rmse: %.6g | validation(pr & rmse): %.4g%% & %.6g | time_cost(s): %.3f\n", 
+				t+1, learning_rate, error, rmse, validation.first * 100.0, validation.second, timer.GetLast_asSec()); 
 		learning_rate = learning_rate * (learning_rate / (learning_rate + (learning_rate * m_paramsLearning.rate_decay)));	
 
 		if(rmse <= m_paramsLearning.epsilon)
@@ -163,11 +130,11 @@ void Perceptron::Train(vector<Pattern*>& vtrPatts)
 int32_t Perceptron::Predict(double* y, const int32_t y_len, const double* x, const int32_t x_len)
 {
 	if(!y || !x)
-		return _PERCEPTRON_ERROR_INPUT_NULL;
+		return _FYDL_ERROR_INPUT_NULL;
 	if(y_len != m_paramsPerceptron.output || x_len != m_paramsPerceptron.input - 1)
-		return _PERCEPTRON_ERROR_WRONG_LEN;
+		return _FYDL_ERROR_WRONG_LEN;
 	if(m_wo.IsNull())
-		return _PERCEPTRON_ERROR_MODEL_NULL;
+		return _FYDL_ERROR_MODEL_NULL;
 
 	// for thread save, do not use inner layer
 	double* ai = new double[m_paramsPerceptron.input];		// input layer
@@ -198,50 +165,38 @@ int32_t Perceptron::Predict(double* y, const int32_t y_len, const double* x, con
 
 	delete ai; 
 	
-	return _PERCEPTRON_SUCCESS; 
+	return _FYDL_SUCCESS; 
 }
 
 
 int32_t Perceptron::Save(const char* sFile, const char* sTitle)
 {
 	if(m_wo.IsNull())
-		return _PERCEPTRON_ERROR_MODEL_NULL; 
-	FILE* fp = fopen(sFile, "w"); 
-	if(!fp)
-		return _PERCEPTRON_ERROR_FILE_OPEN;
+		return _FYDL_ERROR_MODEL_NULL; 
+	ofstream ofs(sFile); 
+	if(!ofs.is_open())
+		return _FYDL_ERROR_FILE_OPEN;
 
-	fprintf(fp, "** %s **\n", sTitle);
-	fprintf(fp, "\n"); 
-	fprintf(fp, "regula:%s\n", TypeDefs::RegulaName(m_paramsLearning.regula).c_str()); 
-	fprintf(fp, "mini_batch:%d\n", m_paramsLearning.mini_batch); 
-	fprintf(fp, "max_iters:%d\n", m_paramsLearning.iterations); 
-	fprintf(fp, "real_iters:%d\n", m_nIters); 
-	fprintf(fp, "learning_rate:%.6g\n", m_paramsLearning.learning_rate); 
-	fprintf(fp, "rate_decay:%.6g\n", m_paramsLearning.rate_decay); 
-	fprintf(fp, "epsilon:%.6g\n", m_paramsLearning.epsilon); 
-	fprintf(fp, "\n"); 
-	fprintf(fp, "input:%d\n", m_paramsPerceptron.input-1); 
-	fprintf(fp, "output:%d\n", m_paramsPerceptron.output); 
-	fprintf(fp, "output_activation:%s\n\n", TypeDefs::ActName(m_paramsPerceptron.act_output).c_str()); 
-	fprintf(fp, "\n"); 
+	ofs<<"** "<<sTitle<<" **"<<endl; 
+	ofs<<endl;
 
-	fprintf(fp, "@weight\n"); 
-	//m_wo.Sparsification(); 
-	for(int32_t i = 0; i < (int32_t)m_wo.Rows(); i++)
-	{
-		for(int32_t j = 0; j < (int32_t)m_wo.Cols(); j++)
-		{
-			if(j == 0)
-				fprintf(fp, "%.12g", m_wo[i][j]); 
-			else
-				fprintf(fp, ",%.12g", m_wo[i][j]); 
-		}
-		fprintf(fp, "\n"); 
-	}
-	fprintf(fp, "\n"); 
+	// save learning parameters
+	ofs<<"@learning_params"<<endl; 
+	TypeDefs::Print_PerceptronLearningParamsT(ofs, m_paramsLearning); 
+	ofs<<endl; 
+	
+	// save architecture parameters of RBM
+	ofs<<"@architecture_params"<<endl; 
+	TypeDefs::Print_PerceptronParamsT(ofs, m_paramsPerceptron); 
+	ofs<<endl; 
 
-	fclose(fp);
-	return _PERCEPTRON_SUCCESS; 
+	// save transtorm matrix
+	ofs<<"@weight"<<endl; 
+	Matrix::Print_Matrix(ofs, m_wo);
+	ofs<<endl; 
+
+	ofs.close(); 
+	return _FYDL_SUCCESS; 
 }
 
 
@@ -249,12 +204,10 @@ int32_t Perceptron::Load(const char* sFile, const char* sCheckTitle)
 {
 	ifstream ifs(sFile);  
 	if(!ifs.is_open())
-		return _PERCEPTRON_ERROR_FILE_OPEN;
+		return _FYDL_ERROR_FILE_OPEN;
 	Release(); 
 
 	string str; 
-	int32_t step = 0, wo_off = 0; 
-	bool create_flag = false; 
 
 	if(sCheckTitle)
 	{
@@ -262,7 +215,7 @@ int32_t Perceptron::Load(const char* sFile, const char* sCheckTitle)
 		if(str.find(sCheckTitle) == string::npos) 
 		{
 			ifs.close();
-			return _PERCEPTRON_ERROR_NOT_MODEL_FILE;
+			return _FYDL_ERROR_NOT_MODEL_FILE;
 		}
 	}
 
@@ -271,81 +224,36 @@ int32_t Perceptron::Load(const char* sFile, const char* sCheckTitle)
 		std::getline(ifs, str);
 		if(str.empty())
 			continue; 
+		else if(str == "@learning_params")
+		{
+			if(!TypeDefs::Read_PerceptronLearningParamsT(m_paramsLearning, ifs))
+				return _FYDL_ERROR_LERANING_PARAMS;
+		}
+		else if(str == "@architecture_params")
+		{
+			if(!TypeDefs::Read_PerceptronParamsT(m_paramsPerceptron, ifs))
+				return _FYDL_ERROR_ACH_PARAMS;
+			Create(); 
+		}
 		else if(str == "@weight")
 		{
-			step = 1; 
-			continue; 	
-		}
-
-		if(step == 0)
-		{
-			StringArray array(str.c_str(), ":");
-			if(array.Count() != 2)
-				continue; 
-			if(array.GetString(0) == "regula")
-				m_paramsLearning.regula = TypeDefs::RegulaType(array.GetString(1).c_str()); 
-			if(array.GetString(0) == "mini_batch")
-				sscanf(array.GetString(1).c_str(), "%d", &m_paramsLearning.mini_batch); 
-			if(array.GetString(0) == "max_iters")
-				sscanf(array.GetString(1).c_str(), "%d", &m_paramsLearning.iterations); 
-			if(array.GetString(0) == "real_iters")
-				sscanf(array.GetString(1).c_str(), "%d", &m_nIters); 
-			if(array.GetString(0) == "learning_rate")
-				sscanf(array.GetString(1).c_str(), "%lf", &m_paramsLearning.learning_rate); 
-			if(array.GetString(0) == "rate_decay")
-				sscanf(array.GetString(1).c_str(), "%lf", &m_paramsLearning.rate_decay); 
-			if(array.GetString(0) == "epsilon")
-				sscanf(array.GetString(1).c_str(), "%lf", &m_paramsLearning.epsilon); 
-
-			if(array.GetString(0) == "input")
-			{
-				sscanf(array.GetString(1).c_str(), "%d", &m_paramsPerceptron.input); 
-				m_paramsPerceptron.input += 1;	// add 1 for bias nodes 
-			}
-			if(array.GetString(0) == "output")
-				sscanf(array.GetString(1).c_str(), "%d", &m_paramsPerceptron.output); 
-			if(array.GetString(0) == "output_activation")
-				m_paramsPerceptron.act_output = TypeDefs::ActType(array.GetString(1).c_str()); 
-		}
-		else
-		{ // for m_wo
-			if(!create_flag)
-			{
-				Create(); 
-				create_flag = true; 
-			}
-			StringArray array(str.c_str(), ","); 
-			if((int32_t)array.Count() != m_paramsPerceptron.output)
-			{
-				ifs.close(); 
-				return _PERCEPTRON_ERROR_WEIGHT_MISALIGNMENT;
-			}
-			int32_t row, col; 	
-			for(int32_t k = 0; k < (int32_t)array.Count(); k++) 
-			{
-				row = wo_off / m_wo.Cols(); 
-				col = wo_off % m_wo.Cols(); 
-				sscanf(array.GetString(k).c_str(), "%lf", &(m_wo[row][col]));
-				wo_off += 1; 
-			}
+			if(!Matrix::Read_Matrix(m_wo, ifs))
+				return _FYDL_ERROR_MODEL_DATA;
 		}
 	}
-	ifs.close(); 
 
-	if(wo_off != m_paramsPerceptron.input * m_paramsPerceptron.output)
-		return _PERCEPTRON_ERROR_WEIGHT_MISALIGNMENT;
-
-	return _PERCEPTRON_SUCCESS; 
+	ifs.close();
+	return _FYDL_SUCCESS; 
 }
 
 
-LearningParamsT Perceptron::GetLearningParams()
+PerceptronLearningParamsT Perceptron::GetLearningParams()
 {
 	return m_paramsLearning; 
 }
 
 
-PerceptronParamsT Perceptron::GetPerceptronParams()
+PerceptronParamsT Perceptron::GetArchParams()
 {
 	return m_paramsPerceptron;	
 }
@@ -357,10 +265,24 @@ PerceptronParamsT Perceptron::GetPerceptronParams()
 
 void Perceptron::Create()
 {
-	// create transform matrix and change matrix
+	// create transform matrix
 	m_wo.Create(m_paramsPerceptron.input, m_paramsPerceptron.output); 
-	m_co.Create(m_paramsPerceptron.input, m_paramsPerceptron.output); 
 	Activation::InitTransformMatrix(m_wo, m_paramsPerceptron.act_output); 
+	
+	m_nPattCnt = 0; 
+}
+
+
+void Perceptron::Release()
+{
+	ReleaseAssistant();
+}
+	
+
+void Perceptron::CreateAssistant()
+{
+	// create change matrix
+	m_co.Create(m_paramsPerceptron.input, m_paramsPerceptron.output); 
 	m_co.Init(0.0);
 
 	// create input layer
@@ -370,10 +292,12 @@ void Perceptron::Create()
 
 	// create delta array
 	m_do = new double[m_paramsPerceptron.output];
+	
+	m_nPattCnt = 0; 
 }
 
 
-void Perceptron::Release()
+void Perceptron::ReleaseAssistant()
 {
 	if(m_ai)
 	{
@@ -449,17 +373,19 @@ double Perceptron::BackPropagate(const double* out_vals, const int32_t out_len)
 }
 
 
-void Perceptron::UpdateTransformMatrix(const double learning_rate)
+void Perceptron::ModelUpdate(const double learning_rate)
 {
 	// update transform matrix
 	for(int32_t i = 0; i < m_paramsPerceptron.input; i++) 
 	{
 		for(int32_t j = 0; j < m_paramsPerceptron.output; j++) 
 		{
-			m_wo[i][j] -= learning_rate * (m_co[i][j] + Activation::DActRegula(m_wo[i][j], m_paramsLearning.regula));
+			m_wo[i][j] -= learning_rate * (m_co[i][j] / (double)m_nPattCnt + Activation::DActRegula(m_wo[i][j], m_paramsLearning.regula));
 			m_co[i][j] = 0.0; 
 		}
 	}
+	
+	m_nPattCnt = 0; 
 }
 
 

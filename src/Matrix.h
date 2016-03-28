@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 using namespace std;
 #include <stdint.h>
 #include <sys/time.h>
@@ -13,7 +14,6 @@ namespace fydl
 
 // CLASS
 //	Matrix - definition of matrix 
-//
 class Matrix
 {
 public:
@@ -55,12 +55,16 @@ public:
 	// Sparsificate the matrix
 	void Sparsification(const double dSpTh = 0.000000000001); 
 
+	// Print a matrix object to stream
+	static void Print_Matrix(ostream& os, Matrix& mat);
+	// Read a matrix object from stream
+	static bool Read_Matrix(Matrix& mat, istream& is);
+
 private: 
 	int32_t m_nRows;	// number of rows 
 	int32_t m_nCols;	// number of columes
 	double** m_data;	// 2-d array, which is used for storing element values
 };
-
 
 }
 

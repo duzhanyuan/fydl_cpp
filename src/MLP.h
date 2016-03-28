@@ -21,8 +21,8 @@
 //	v1.0 2016-03-14
 //
 
-#ifndef _FYDL_MLP_H 
-#define _FYDL_MLP_H 
+#ifndef _FYDL_MLP_H
+#define _FYDL_MLP_H
 
 #include <string>
 #include <vector>
@@ -34,17 +34,6 @@ using namespace std;
 #include "Activation.h"
 
 
-// return value
-#define _MLP_SUCCESS	0				// success
-#define _MLP_ERROR_INPUT_NULL	-1		// the input parameters is null
-#define _MLP_ERROR_WRONG_LEN	-2		// length error
-#define _MLP_ERROR_MODEL_NULL	-3		// the model is null
-#define _MLP_ERROR_FILE_OPEN	-4		// failed to open file
-#define _MLP_ERROR_NOT_MODEL_FILE	-5	// is not MLP model file
-#define _MLP_ERROR_WEIGHT_MISALIGNMENT	-6	// weight is not aligned
-#define _MLP_ERROR_LAYERS_MISMATCHING	-7	// depth is not matched
-
-
 namespace fydl
 {
 
@@ -52,7 +41,7 @@ namespace fydl
 //	MLP - neural network based on MLP
 //
 // DESCRIPTION
-//	This MLP neural network is based on back-propagation algorithm. 
+//	This MLP neural network is based on Back-Propagation (BP) algorithm. 
 //	The training supports online(SGD), mini-batch(MSGD) and batch(GD) mode
 //
 class MLP
@@ -66,18 +55,15 @@ public:
 	//	InitFromConfig - initialize the MLP parameters by values read from config file
 	// 
 	// DESCRIPTION
-	//	nInput: number of input signal 
-	//	vtrHidden: number of hidden nodes for each hidden layer, in bottom-up order
-	//	nOnput: number of output signal 
-	//	eActHidden, eActOutput: activation types of hidden and output layers
-	//	pLearningParamsT: learning parameters
+	//	mlpParamsT: architecture parameters of MLP
+	//	mlpLearningParamsT: learning parameters
 	//	sConfigFile: config file
+	//	nInput: number of input signal 
+	//	nOnput: number of output signal 
 	//
 	// RETURN
 	//	true for success, false for some errors
-	void Init(const int32_t nInput, vector<int32_t>& vtrHidden, const int32_t nOutput, 
-			const EActType eActHidden = _ACT_RELU, const EActType eActOutput = _ACT_SIGMOID, 
-			const LearningParamsT* pLearningParamsT = NULL); 
+	void Init(const MLPParamsT mlpParamsT, const MLPLearningParamsT mlpLearningParamsT); 
 	bool InitFromConfig(const char* sConfigFile, const int32_t nInput, const int32_t nOutput);
 
 	// NAME
@@ -85,7 +71,7 @@ public:
 	// 
 	// DESCRIPTION
 	//	vtrPatts: list of training patterns
-	void Train(vector<Pattern*>& vtrPatts);
+	void Train(vector<Pattern*>& vtrPatts);	
 
 	// NAME
 	//	Predict - calculate prediction of input signal based on current MLP model
@@ -97,40 +83,59 @@ public:
 	//	x_len: size of x
 	// 
 	// RETURN
-	//	Return _MLP_SUCCESS for success, others for some errors
+	//	Return _FYDL_SUCCESS for success, others for some errors
 	int32_t Predict(double* y, const int32_t y_len, const double* x, const int32_t x_len); 
 
 	// NAME
 	//	Save - save current MLP model to file
-	//
-	// DESCRIPTION
-	//	sFile - MLP model file
-	// 
-	// RETURN
-	//	true for success, false for some errors
-	int32_t Save(const char* sFile, const char* sTitle = "MLP Neural Network"); 
-	
-	// NAME
 	//	Load - load MLP model from file to construct current object
 	//
 	// DESCRIPTION
 	//	sFile - MLP model file
 	// 
 	// RETURN
-	//	true for success, false for some errors
-	int32_t Load(const char* sFile, const char* sCheckTitle = NULL); 
+	//	Return _FYDL_SUCCESS for success, others for some errors
+	int32_t Save(const char* sFile, const char* sTitle = "MLP Neural Network"); 
+	int32_t Load(const char* sFile, const char* sCheckTitle = "MLP Neural Network"); 
 
 	// Get learning parameters
-	LearningParamsT GetLearningParams(); 
+	MLPLearningParamsT GetLearningParams(); 
 	
 	// Get architecture parameters 
-	MLPNNParamsT GetMLPNNParams(); 
+	MLPParamsT GetArchParams(); 
+
+	// NAME
+	//	FfBp_Step - feed forward and back propagate once
+	//
+	// DESCRIPTION
+	//	y - dependent variables 
+	//	y_len - length of y
+	//	x - independent variables 
+	//	x_len - length of x
+	//	bFirst - if it is the first time to call this fucntion 
+	//
+	// RETURN
+	//	The error in this step
+	double FfBp_Step(const double* y, const int32_t y_len, const double* x, const int32_t x_len, const bool bFirst = false);
+	
+	// NAME
+	//	ModelUpdate - update all transform matrices in MLP
+	// 
+	// DESCRIPTION
+	//	After transform matrices updating, elements of all change matrices should be set as 0
+	//	
+	//	learning_rate: learning rate
+	void ModelUpdate(const double learning_rate); 
 
 private:
-	// Create inner objects, allocate menory
+	// Create model variables, allocate menory for them 
 	void Create();
 	// Release inner objects
 	void Release();
+	// Create assistant variables, allocate menory for them 
+	void CreateAssistant();
+	// Release assistant variables
+	void ReleaseAssistant(); 
 
 	// NAME
 	//	FeedForward - forward phase
@@ -165,15 +170,6 @@ private:
 			Matrix& w, const EActType up_act_type); 
 
 	// NAME
-	//	UpdateTransformMatrices - update all transform matrices in MLP
-	// 
-	// DESCRIPTION
-	//	After transform matrices updating, elements of all change matrices should be set as 0
-	//	
-	//	learning_rate: learning rate
-	void UpdateTransformMatrices(const double learning_rate); 
-
-	// NAME
 	//	Validation - validate current MLP model
 	// 
 	// DESCRIPTION	
@@ -184,22 +180,25 @@ private:
 	//	The precision and RMSE
 	pair<double, double> Validation(vector<Pattern*>& vtrPatts, const int32_t nBackCnt);
 
-private: 
-	LearningParamsT m_paramsLearning;	// learning parameters
-	int32_t m_nIters;					// real iteration times
-	MLPNNParamsT m_paramsNN;			// architecture parameters of MLP
-
+public: 
+	// model variables
 	Matrix* m_whs;	// transform matrices of hidden layers
 	Matrix m_wo;	// transform matrix of output layer
 
+private: 
+	MLPLearningParamsT m_paramsLearning;	// learning parameters
+	MLPParamsT m_paramsMLP;			// architecture parameters of MLP
+	
+	// assistant variables for training
 	double* m_ai;	// input layer
 	double** m_ahs;	// hidden layers
 	double* m_ao;	// output layer
-
 	double** m_dhs;	// delta arrays of hidden layers
 	double* m_do;	// delta array of output layer
 	Matrix* m_chs;	// change matrices of hidden layers
 	Matrix m_co;	// change matrix of output layer
+
+	int32_t m_nPattCnt;
 }; 
 
 }

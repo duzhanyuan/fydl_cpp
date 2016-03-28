@@ -12,7 +12,6 @@ using namespace std;
 namespace fydl
 {
 
-
 // CLASS
 //	Activation - definition of activation functions
 // 

@@ -71,14 +71,14 @@ void TrainDemo(const char* sConfigFile, const char* sPattFile, const char* sMode
 		return; 
 	}
 
-	TypeDefs::Print_LearningParamsT(cout, perceptron.GetLearningParams()); 
+	TypeDefs::Print_PerceptronLearningParamsT(cout, perceptron.GetLearningParams()); 
 	cout<<"--"<<endl; 
-	TypeDefs::Print_PerceptronParamsT(cout, perceptron.GetPerceptronParams()); 
+	TypeDefs::Print_PerceptronParamsT(cout, perceptron.GetArchParams()); 
 	cout<<"==========================="<<endl; 
 
 	perceptron.Train(vtr_patts); 
 
-	if(perceptron.Save(sModelFile) != _MLP_SUCCESS)
+	if(perceptron.Save(sModelFile) != _FYDL_SUCCESS)
 		cout<<"failed to save the Perceptron model to "<<sModelFile<<endl; 
 
 	for(size_t i = 0; i < vtr_patts.size(); i++)
@@ -92,15 +92,17 @@ void TestDemo(const char* sModelFile, const char* sPattFile)
 	cout<<"== Perceptron Example: Testing =="<<endl; 
 	
 	Perceptron perceptron; 
-	if(perceptron.Load(sModelFile) != _PERCEPTRON_SUCCESS)
+	int32_t ret = perceptron.Load(sModelFile); 
+	if(ret != _FYDL_SUCCESS)
 	{
 		cout<<"failed to load the Perceptron model from "<<sModelFile<<endl; 
+		cout<<"error code is "<<ret<<endl; 
 		return;
 	}
 
-	TypeDefs::Print_LearningParamsT(cout, perceptron.GetLearningParams()); 
+	TypeDefs::Print_PerceptronLearningParamsT(cout, perceptron.GetLearningParams()); 
 	cout<<"--"<<endl; 
-	TypeDefs::Print_PerceptronParamsT(cout, perceptron.GetPerceptronParams()); 
+	TypeDefs::Print_PerceptronParamsT(cout, perceptron.GetArchParams()); 
 	cout<<"=========================="<<endl; 
 
 	vector<Pattern*> vtr_patts; 
@@ -110,8 +112,6 @@ void TestDemo(const char* sModelFile, const char* sPattFile)
 		return; 
 	}
 
-
-	int32_t ret;
 	int32_t y_len = vtr_patts[0]->m_nYCnt;	
 	double* y = new double[y_len]; 
 	int32_t patts = (int32_t)vtr_patts.size(); 
@@ -122,7 +122,7 @@ void TestDemo(const char* sModelFile, const char* sPattFile)
 	for(int32_t i = 0; i < patts; i++) 
 	{
 		ret = perceptron.Predict(y, y_len, vtr_patts[i]->m_x, vtr_patts[i]->m_nXCnt); 
-		if(ret == _MLP_SUCCESS)
+		if(ret == _FYDL_SUCCESS)
 		{
 			success += 1;  
 			error = Pattern::Error(y, vtr_patts[i]->m_y, y_len);
